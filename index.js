@@ -1,4 +1,5 @@
 const express = require('express');
+//create express app
 const app =  express();
 const port = 80;
 const expressLayouts = require('express-ejs-layouts');
