@@ -1,16 +1,19 @@
-const user = require('../models/users')
+const User = require('../models/users')
 
 module.exports.profile=(req, res)=>{
     return res.render('user_profile', {
         title:'User Profile'
     })
 }
+
+//render the signup page
 module.exports.signup = (req ,res)=>{
     return res.render('user_sign_up', {
         title:'Connectify | Sign Up'
     })
 }
 
+//render the sing in page
 module.exports.signin = (req ,res)=>{
     return res.render('user_sign_in', {
         title:'Connectify | Sign In'
@@ -21,7 +24,7 @@ module.exports.signin = (req ,res)=>{
 module.exports.create = (req, res)=>{
     //check weather password and confirm password are equal or not, if not then redirect to signup page
     if(req.body.password != req.body.confirm_password){
-        return res.redirect('/signup');
+        return res.redirect('back');
     }
     //check if the user already exists in the database, if yes then redirect to signin page
     User.findOne({ email: req.body.email })
