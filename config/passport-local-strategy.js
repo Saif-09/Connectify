@@ -1,53 +1,58 @@
 const passport  = require('passport');
 
+
 const LocalStrategy = require('passport-local').Strategy;
 
 const User = require('../models/users')
 
-module.exports.profile=(req, res)=>{
-    return res.render('user_profile', {
-        title:'User Profile'
-    })
+module.exports.profile = async (req, res) => {
+    try {
+        res.render('user_profile', {
+            title: 'User Profile'
+        })
+    } catch (err) {
+        console.log(err);
+    }
 }
 
-//authentication using passport
+// authentication using passport
 passport.use(new LocalStrategy({
-    usernameField: 'email'
-    },
-    function(email, password, done) {
-        //find a user and establish the identity
-        User.findOne({email:email},function(err,user){
-            if(err){
-                console.log('Error in finding user --> Passport')
-                return done(err);
-            }
-            if(!user || user.password != password){
+        usernameField: 'email'
+    }, async (email, password, done) => {
+        try {
+            // find a user and establish the identity
+            const user = await User.findOne({ email });
+            if (!user || user.password != password) {
                 console.log('Invalid Username/Password');
-                return done(null, false, {message: 'Invalid username/password'});
-
+                return done(null, false, { message: 'Invalid username/password' });
             }
             return done(null, user);
-        });
-
-    }
-));
-
-//serializing the user which key is to be kept in the cookies
-passport.serializeUser(function(user,done){
-    done(null,user.id);
-})
-
-
-//deserializing the user from the key in the cookies
-passport.deserializeUser(function(id,done){
-    User.findById(id,function(err,user){
-        if(err){
+        } catch (err) {
             console.log('Error in finding user --> Passport')
             return done(err);
         }
-        return done(null, user);
+    }
+));
 
-    });
+// serializing the user which key is to be kept in the cookies
+passport.serializeUser((user, done) => {
+    done(null, user.id);
 });
 
-module.exports=passport;
+// deserializing the user from the key in the cookies
+passport.deserializeUser(async (id, done) => {
+    try {
+        const user = await User.findById(id);
+        if (!user) {
+            console.log('Error in finding user --> Passport');
+            return done(null, false, { message: 'User not found in deserialization' });
+        }
+        return done(null, user);
+    } catch (err) {
+        console.log('Error in finding user --> Passport');
+        return done(err);
+    }
+});
+
+module.exports = passport;
+
