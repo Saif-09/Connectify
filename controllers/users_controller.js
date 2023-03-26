@@ -105,3 +105,12 @@ module.exports.createSession = (req,res)=>{
 //handle session creation
 //handle user not found
 }
+
+//Creating sign out
+module.exports.signout = (req, res) => {
+    // Clear the user_id cookie
+    res.clearCookie('user_id');
+    // Redirect the user to the home page or the sign-in page
+    res.redirect('/users/sign-in');
+  };
+  
