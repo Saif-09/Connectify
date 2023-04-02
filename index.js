@@ -9,7 +9,11 @@ const db = require('./config/mongoose');
 const session = require('express-session');
 const passport = require('passport');
 const passportLocal = require('./config/passport-local-strategy');
-
+const MongoStore = require ('connect-mongo');
+const store = MongoStore.create({
+  mongoUrl: 'mongodb://127.0.0.1:27017/connectify_db',
+  ttl: 24 * 60 * 60 // 1 day
+});
 app.use(express.urlencoded());
 
 app.use(cookieParser());
@@ -26,7 +30,7 @@ app.set('layout extractScripts', true);
 app.set('view engine', 'ejs');
 app.set('views','./views');
 
-
+//mongo store is used to store the session cookie in the db
 app.use(session({
   name:'connectify',
   //todo change the secret before deployement in production mode
@@ -35,6 +39,10 @@ app.use(session({
   resave: false,
   cookie: {
     maxAge: 1000 * 60 * 60 * 24 * 365 * 10 // 10 years
+  },
+  store: store,
+  function(err){
+    console.log(err || 'connect-mongodb setup ok');
   }
 }));
 
@@ -55,3 +63,6 @@ app.listen(port)
     console.log(`Server running on port:${port}`);
 });
 
+db().then(res => {
+  console.log("Database connected");
+})

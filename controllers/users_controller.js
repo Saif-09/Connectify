@@ -1,6 +1,7 @@
 const User = require('../models/users')
 
 module.exports.profile=(req, res)=>{
+    
     return res.render('user_profile', {
         title:'User Profile'
     })
@@ -8,6 +9,10 @@ module.exports.profile=(req, res)=>{
 
 //render the signup page
 module.exports.signup = (req ,res)=>{
+    if(req.isAuthenticated()){
+        res.redirect('/users/profile')
+    }
+
     return res.render('user_sign_up', {
         title:'Connectify | Sign Up'
     })
@@ -15,9 +20,15 @@ module.exports.signup = (req ,res)=>{
 
 //render the sing in page
 module.exports.signin = (req ,res)=>{
-    return res.render('user_sign_in', {
-        title:'Connectify | Sign In'
-    })
+    if(req.isAuthenticated()){
+        console.log("already logged in");
+        return res.redirect('/users/profile')
+    }else{
+        return res.render('user_sign_in', {
+            title:'Connectify | Sign In'
+        })
+    }
+    
 }
 
 //get the sign-up data
@@ -44,6 +55,15 @@ module.exports.create = (req, res)=>{
     });
 }
 
+//sign in and create a session for the user
 module.exports.createSession = (req,res)=>{
     return res.redirect('/');
+}
+
+module.exports.destroySession = (req,res)=>{
+
+    req.logout(function(err) {
+        if(err) return next(err);
+        return res.redirect('/');
+    });
 }
