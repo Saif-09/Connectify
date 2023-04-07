@@ -1,6 +1,9 @@
+<h1>Connectify / <%=title%></h1>
 
-        <h1>Connectify / <%=title%></h1>
-        <br>
-        <h1>Welcome to my website!</h1>
-        <p>Click <a href="/signup">here</a> to sign up.</p>
-        
+<section id="feed-posts">
+  <h4>POSTS</h4>
+  <form action="/posts/create" id="new-post-form" method="post">
+    <textarea name="content" cols="30" rows="3" placeholder="Typehere......"></textarea>
+    <input type="submit" value="Post">
+  </form>
+</section>

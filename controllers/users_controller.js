@@ -60,6 +60,7 @@ module.exports.createSession = (req,res)=>{
     return res.redirect('/');
 }
 
+//signout or end a session 
 module.exports.destroySession = (req,res)=>{
 
     req.logout(function(err) {
