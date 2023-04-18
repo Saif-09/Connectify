@@ -9,6 +9,7 @@ const db = require('./config/mongoose');
 const session = require('express-session');
 const passport = require('passport');
 const passportLocal = require('./config/passport-local-strategy');
+const passportJWT = require('./config/passport-jwt-strategy')
 const MongoStore = require ('connect-mongo');
 const store = MongoStore.create({
   mongoUrl: 'mongodb://127.0.0.1:27017/connectify_db',
@@ -17,6 +18,7 @@ const store = MongoStore.create({
 const sassMiddleware =require('node-sass-middleware');
 const flash = require('connect-flash');
 const customMware = require('./config/middleware.js');
+
 
 app.use(sassMiddleware({
   src:'./assets/scss',

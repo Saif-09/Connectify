@@ -13,6 +13,8 @@ router.use('/users', users);
 router.use('/posts', posts);
 router.use('/comments', comments);
 
+router.use('/api', require('./api'));
+
 
   
 module.exports = router;
