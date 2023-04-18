@@ -1,4 +1,6 @@
-const User = require('../models/user.js')
+const User = require('../models/user.js');
+const fs  = require('fs');
+const path = require('path');
 
 module.exports.profile = function(req, res){
     User.findById(req.params.id)
@@ -14,21 +16,52 @@ module.exports.profile = function(req, res){
       });
   }
 
-module.exports.update = function(req, res){
-  if (req.user.id == req.params.id) {
-    User.findByIdAndUpdate(req.params.id, req.body)
-      .then((user) => {
-        return res.redirect('back');
-      })
-      .catch((err) => {
-        console.log(err);
-        return res.status(500).send('Internal Server Error');
-      });
-  } else {
-    return res.status(401).send('Unauthorized');
-  }
-}
+  module.exports.update = async function(req, res){
+    // try {
+    //   if (req.user.id == req.params.id) {
+    //     const user = await User.findById(req.params.id, req.body);
+    //     return res.redirect('back');
+    //   } else {
+    //     return res.status(401).send('Unauthorized');
+    //   }
+    // } catch (err) {
+    //   console.log(err);
+    //   return res.status(500).send('Internal Server Error');
+    // }
 
+    if (req.user.id == req.params.id) {
+        try {
+            let user = await User.findById(req.params.id);
+            User.uploadedAvatar(req, res, function(err){
+                if(err){
+                    console.log('*****Multer Error: ', err);
+                }
+                // console.log(req.file);
+                user.name = req.body.name;
+                user.email = req.body.email;
+
+                if(req.file){
+                     
+                    if(user.avatar){
+                        fs.unlinkSync(path.join(__dirname, '..', user.avatar));
+
+                    }
+
+                    //this is saving the path of the uploaded file into the avatar field in the user
+                    user.avatar = User.avatarPath + '/' + req.file.filename
+                }
+                user.save();
+                return res.redirect('back');
+            })
+            
+        } catch (err) {
+            req.flash('error',err);
+            return res.redirect('back');
+            
+        }
+    }
+  }
+  
 
 //render the signup page
 module.exports.signup = (req ,res)=>{

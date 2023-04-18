@@ -29,21 +29,37 @@ module.exports.create = async (req, res) => {
   }
 };
 
-module.exports.destroy = async (req, res) => {
-  try {
-    const post = await Post.findById(req.params.id);
-    //.id means converting the object id into string
-    if (post.user == req.user.id) {
-      post.deleteOne();
+module.exports.destroy = async function(req, res){
 
-      await Comment.deleteMany({ post: req.params.id }).then(() => {
-        res.redirect("back");
-      });
-    } else {
-      res.redirect("back");
-    }
-  } catch (err) {
-    console.log("error in deleting a post: ", err);
-    res.redirect("back");
+  try{
+      let post = await Post.findById(req.params.id);
+
+      if (post.user == req.user.id){
+          post.deleteOne();
+
+          await Comment.deleteMany({post: req.params.id});
+
+
+          if (req.xhr){
+              return res.status(200).json({
+                  data: {
+                      post_id: req.params.id
+                  },
+                  message: "Post deleted"
+              });
+          }
+
+          req.flash('success', 'Post and associated comments deleted!');
+
+          return res.redirect('back');
+      }else{
+          req.flash('error', 'You cannot delete this post!');
+          return res.redirect('back');
+      }
+
+  }catch(err){
+      req.flash('error', err);
+      return res.redirect('back');
   }
-};
+  
+}
