@@ -1,4 +1,4 @@
-const User = require('../models/users.js')
+const User = require('../models/user.js')
 
 module.exports.profile = function(req, res){
     User.findById(req.params.id)
@@ -58,36 +58,44 @@ module.exports.signin = (req ,res)=>{
 module.exports.create = (req, res)=>{
     //check weather password and confirm password are equal or not, if not then redirect to signup page
     if(req.body.password != req.body.confirm_password){
+        req.flash('error', 'Passwords do not match');
         return res.redirect('back');
     }
     //check if the user already exists in the database, if yes then redirect to signin page
-    User.findOne({ email: req.body.email })
-    .then(user => {
-        if (!user) {
-            return User.create(req.body);
-        } else {
-            throw new Error('User already exists');
+    User.findOne({email: req.body.email}, function(err, user){
+        if(err){req.flash('error', err); return}
+
+        if (!user){
+            User.create(req.body, function(err, user){
+                if(err){req.flash('error', err); return}
+
+                return res.redirect('/users/sign-in');
+            })
+        }else{
+            req.flash('success', 'You have signed up, login to continue!');
+            return res.redirect('back');
         }
-    })
-    .then(user => {
-        return res.redirect('/users/sign-in');
-    })
-    .catch(err => {
-        console.log(err);
-        return res.redirect('back');
+
     });
 }
 
 //sign in and create a session for the user
 module.exports.createSession = (req,res)=>{
+    req.flash('success','Logged in Successfully');
+    //check if the user already exists in the database, if yes then redirect to signin page
     return res.redirect('/');
 }
 
 //signout or end a session 
 module.exports.destroySession = (req,res)=>{
 
+    // req.logout();
+    // req.flash('success','Logged out Successfully');
+    // return res.redirect('/');
+
     req.logout(function(err) {
         if(err) return next(err);
+    req.flash('success','Logged out Successfully');
         return res.redirect('/');
     });
 }

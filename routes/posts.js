@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const passport = require('../config/passport-local-strategy')
+// const passport = require('../config/passport-local-strategy');
+const passport   = require('passport');
 
 
 const postController = require('../controllers/posts_controller')

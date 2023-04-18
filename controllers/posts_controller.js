@@ -8,21 +8,23 @@ module.exports.create = async (req, res) => {
       content: req.body.content,
       user: req.user._id,
     });
+    req.flash('success', 'Post Published!');
     return res.redirect("back");
   } catch (err) {
-    console.log("error in creating a post: ", err);
+    // console.log("error in creating a post: ", err);
+    req.flash('error', err);
     return res.redirect("back");
   }
 };
 
 module.exports.destroy = async (req, res) => {
   try {
-    const post = await Post.findByIdAndRemove(req.params.id);
+    const post = await Post.findById(req.params.id);
     //.id means converting the object id into string
     if (post.user == req.user.id) {
       post.remove();
 
-      Comment.deleteMany({ post: req.params.id }).then(() => {
+      await Comment.deleteMany({ post: req.params.id }).then(() => {
         res.redirect("back");
       });
     } else {

@@ -1,57 +1,54 @@
-const Comment = require("../models/comment.js");
-const Post = require("../models/post.js");
+const Comment = require('../models/comment.js');
+const Post = require('../models/post.js');
 
-module.exports.create = function(req, res){
-  Post.findById(req.body.post)
-  .then(function(post){
-      if (post){
-          return Comment.create({
-              content: req.body.content,
-              post: req.body.post,
-              user: req.user._id
-          })
-          .then(function(comment){
-              post.comments.push(comment);
-              return post.save();
-          })
-          .then(function(){
-              return res.redirect('/');
-          })
-          .catch(function(err){
-              console.log(err);
-              return res.redirect('back');
-          });
-      }
-  })
-  .catch(function(err){
-      console.log(err);
-      return res.redirect('back');
-  });
+module.exports.create = async function(req, res){
+
+    try{
+        let post = await Post.findById(req.body.post);
+
+        if (post){
+            let comment = await Comment.create({
+                content: req.body.content,
+                post: req.body.post,
+                user: req.user._id
+            });
+
+            post.comments.push(comment);
+            post.save();
+            req.flash('success', 'Comment published!');
+
+            res.redirect('/');
+        }
+    }catch(err){
+        req.flash('error', err);
+        return;
+    }
+    
 }
 
-module.exports.destroy = function(req, res){
-  Comment.findById(req.params.id)
-  .then(function(comment){
-      if (comment.user == req.user.id){
 
-          let postId = comment.post;
+module.exports.destroy = async function(req, res){
 
-          comment.remove();
+    try{
+        let comment = await Comment.findById(req.params.id);
 
-          Post.findByIdAndUpdate(postId, { $pull: {comments: req.params.id}})
-          .then(function(post){
-              return res.redirect('back');
-          })
-          .catch(function(err){
-              console.log(err);
-              return res.redirect('back');
-          });
-      }else{
-          return res.redirect('back');
-      }
-  })
-  .catch(function(err){
-      console.log(err);
-      return res.redirect('back');
-  });
+        if (comment.user == req.user.id){
+
+            let postId = comment.post;
+
+            comment.remove();
+
+            let post = Post.findByIdAndUpdate(postId, { $pull: {comments: req.params.id}});
+            req.flash('success', 'Comment deleted!');
+
+            return res.redirect('back');
+        }else{
+            req.flash('error', 'Unauthorized');
+            return res.redirect('back');
+        }
+    }catch(err){
+        req.flash('error', err);
+        return;
+    }
+    
 }
