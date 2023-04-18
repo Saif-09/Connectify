@@ -1,11 +1,34 @@
-const User = require('../models/users')
+const User = require('../models/users.js')
 
-module.exports.profile=(req, res)=>{
-    
-    return res.render('user_profile', {
-        title:'User Profile'
-    })
+module.exports.profile = function(req, res){
+    User.findById(req.params.id)
+      .then(user => {
+        return res.render('user_profile', {
+          title: 'User Profile',
+          profile_user: user
+        });
+      })
+      .catch(err => {
+        console.log(err);
+        return res.redirect('back');
+      });
+  }
+
+module.exports.update = function(req, res){
+  if (req.user.id == req.params.id) {
+    User.findByIdAndUpdate(req.params.id, req.body)
+      .then((user) => {
+        return res.redirect('back');
+      })
+      .catch((err) => {
+        console.log(err);
+        return res.status(500).send('Internal Server Error');
+      });
+  } else {
+    return res.status(401).send('Unauthorized');
+  }
 }
+
 
 //render the signup page
 module.exports.signup = (req ,res)=>{
