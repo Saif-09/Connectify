@@ -15,7 +15,7 @@ module.exports.createSession = async (req, res) => {
       message: "Signin Successful, here your token",
       data: {
         //This line will generate a JSON WEB TOKEN
-        token: jwt.sign(user.toJSON(), "connectify", { expiresIn: "10000" }),
+        token: jwt.sign(user.toJSON(), "connectify", { expiresIn: "100000" }),
       },
     });
   } catch {
